@@ -8,12 +8,16 @@ import {
   ShieldCheck, 
   Download, 
   Layers, 
-  HardDrive, 
-  Cpu, 
-  CheckCircle2, 
+  Laptop, 
+  MapPin, 
+  Filter, 
   FileText, 
-  Briefcase,
-  Laptop
+  Compass, 
+  CheckCircle2, 
+  Info,
+  ChevronRight,
+  TrendingUp,
+  School
 } from 'lucide-react';
 
 const CSR_BUNDLES = [
@@ -44,20 +48,31 @@ const CSR_BUNDLES = [
 ];
 
 export const CorporateView: React.FC = () => {
-  const { csrAllocations } = useApp();
+  const { requests, csrAllocations } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'STATUTORY_CSR' | 'ITAD_ESG'>('STATUTORY_CSR');
+  const [activeTab, setActiveTab] = useState<'NEED_INTELLIGENCE' | 'STATUTORY_CSR' | 'ITAD_ESG'>('NEED_INTELLIGENCE');
   const [selectedBundle, setSelectedBundle] = useState<typeof CSR_BUNDLES[0] | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('ALL');
 
   // ITAD State
   const [decomCount, setDecomCount] = useState(25);
   const [decomDeviceType, setDecomDeviceType] = useState('Enterprise Laptops (Core i5 / 16GB)');
   const [itadPledged, setItadPledged] = useState(false);
 
+  // Group needs by district to reveal real unmediated demand
+  const filteredRequests = requests.filter(r => {
+    if (selectedDistrict === 'ALL') return true;
+    return r.location.toLowerCase().includes(selectedDistrict.toLowerCase());
+  });
+
+  const totalDemandUnits = requests.reduce((acc, curr) => acc + curr.quantityNeeded, 0);
+  const totalFulfilledUnits = requests.reduce((acc, curr) => acc + curr.quantityFulfilled, 0);
+  const deficitPercentage = Math.round(((totalDemandUnits - totalFulfilledUnits) / (totalDemandUnits || 1)) * 100);
+
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 sm:space-y-8">
       
-      {/* Corporate Profile Header */}
+      {/* Header Profile Banner */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4">
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
@@ -65,19 +80,29 @@ export const CorporateView: React.FC = () => {
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-base sm:text-xl font-bold text-white">Enterprise CSR & ESG Gateway</h1>
+              <h1 className="text-base sm:text-xl font-bold text-white">Corporate CSR Strategic Portal</h1>
               <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                <ShieldCheck className="w-3 h-3" /> Sec 135 Compliant
+                <ShieldCheck className="w-3 h-3" /> Demand-Pull CSR Engine
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-slate-400 mt-1">
-              Automated Form CSR-2 Reporting • Schedule VII Verified • DoD 5220.22-M ITAD
+              Direct Beneficiary Ground Data • Zero Intermediary Bias • MCA Section 135 Compliant
             </p>
           </div>
         </div>
 
         {/* View Switcher */}
-        <div className="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 w-full sm:w-auto text-xs font-semibold shrink-0">
+        <div className="grid grid-cols-3 p-1 bg-slate-950 rounded-xl border border-slate-800 w-full sm:w-auto text-xs font-semibold shrink-0">
+          <button
+            onClick={() => setActiveTab('NEED_INTELLIGENCE')}
+            className={`px-3 py-1.5 rounded-lg transition ${
+              activeTab === 'NEED_INTELLIGENCE'
+                ? 'bg-emerald-500 text-slate-950 font-bold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Need Intelligence
+          </button>
           <button
             onClick={() => setActiveTab('STATUTORY_CSR')}
             className={`px-3 py-1.5 rounded-lg transition ${
@@ -86,7 +111,7 @@ export const CorporateView: React.FC = () => {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Statutory CSR Projects
+            CSR Bundles
           </button>
           <button
             onClick={() => setActiveTab('ITAD_ESG')}
@@ -96,23 +121,160 @@ export const CorporateView: React.FC = () => {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            ITAD & E-Waste Drive
+            ITAD / E-Waste
           </button>
         </div>
       </div>
 
-      {activeTab === 'STATUTORY_CSR' ? (
-        /* TAB 1: STATUTORY CSR BUNDLES & AUDIT LEDGER */
+      {/* TAB 1: NEED INTELLIGENCE (Direct Beneficiary Demand Heatmap) */}
+      {activeTab === 'NEED_INTELLIGENCE' && (
         <div className="space-y-6">
           
-          {/* Active Bundles */}
+          {/* Ground Reality Callout */}
+          <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/30 border border-emerald-500/30 rounded-2xl p-5 sm:p-6 shadow-xl space-y-3">
+            <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <Compass className="w-4 h-4" />
+              <span>Direct-from-Source Institutional Deficit Audits</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-white">
+              Stop relying on intermediary NGO pitch decks. Allocate capital to primary, verified school demand.
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+              Traditional CSR is limited by supply-push pitches: implementing non-profits propose projects that match their own convenience. Below is raw, unfiltered demand raised directly by verified government school principals and shelter wardens.
+            </p>
+
+            {/* Quick Metrics Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800">
+                <span className="text-[10px] text-slate-400 block">Total Verified Demand</span>
+                <span className="text-base font-bold text-white">{totalDemandUnits} units</span>
+              </div>
+              <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800">
+                <span className="text-[10px] text-slate-400 block">Critical Deficit Rate</span>
+                <span className="text-base font-bold text-rose-400">{deficitPercentage}% Unfulfilled</span>
+              </div>
+              <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800">
+                <span className="text-[10px] text-slate-400 block">Institutional Sources</span>
+                <span className="text-base font-bold text-emerald-400">100% U-DISE Audited</span>
+              </div>
+              <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800">
+                <span className="text-[10px] text-slate-400 block">Intermediary Markup</span>
+                <span className="text-base font-bold text-sky-400">0% (Direct Sourcing)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Regional Filter & Direct Demand Explorer */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-white">
+                  Grassroots Deficit Registry ({filteredRequests.length} Verified Institutions)
+                </h3>
+                <p className="text-xs text-slate-400">Select an unaddressed institution to fund directly via CSR-1 implementing partners</p>
+              </div>
+
+              {/* District Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5 text-slate-500" />
+                <select
+                  value={selectedDistrict}
+                  onChange={e => setSelectedDistrict(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="ALL">All Operational Clusters</option>
+                  <option value="Delhi">Delhi-NCR Cluster</option>
+                  <option value="Sarita Vihar">South East Delhi</option>
+                  <option value="Dwarka">South West Delhi</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Direct Demand Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRequests.map(req => {
+                const deficit = req.quantityNeeded - req.quantityFulfilled;
+                const totalCostToSponsor = deficit * (req.estimatedCostPerUnit || 1000);
+
+                return (
+                  <div
+                    key={req.id}
+                    className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:border-slate-700 transition"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                          {req.category}
+                        </span>
+                        <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" /> U-DISE: {req.udiseOrRegNo}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-white leading-snug">{req.title}</h4>
+                        <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-1">
+                          <School className="w-3 h-3 text-slate-500 shrink-0" />
+                          <span className="truncate">{req.beneficiaryName}</span>
+                        </p>
+                        <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3 text-slate-600 shrink-0" />
+                          <span>{req.location} • {req.pincode}</span>
+                        </p>
+                      </div>
+
+                      {/* Deficit Highlight Box */}
+                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/80 space-y-1 text-xs">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Unmet Gap:</span>
+                          <span className="text-rose-400 font-bold">{deficit} {req.unit}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-400">
+                          <span>Capital Required:</span>
+                          <span className="text-emerald-400 font-bold">₹{totalCostToSponsor.toLocaleString('en-IN')}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800 mt-3 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-500">Urgency: <strong className="text-slate-300">{req.urgency}</strong></span>
+                      <button
+                        onClick={() => {
+                          setSelectedBundle({
+                            id: `DIRECT-${req.id}`,
+                            title: `Direct Institutional Fulfillment: ${req.beneficiaryName}`,
+                            scheduleVII: 'Item (ii) - Education Infrastructure',
+                            targetCount: `${deficit} ${req.unit} direct to ${req.beneficiaryName}`,
+                            totalBudget: totalCostToSponsor,
+                            description: `Direct CSR funding allocated to bridge raw deficit of ${deficit} ${req.unit} for U-DISE entity ${req.udiseOrRegNo}.`
+                          });
+                        }}
+                        className="text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-3 py-1.5 rounded-lg font-bold transition shadow-md shadow-emerald-500/20 flex items-center gap-1"
+                      >
+                        <span>Adopt Need</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* TAB 2: PRE-PACKAGED STATUTORY CSR BUNDLES */}
+      {activeTab === 'STATUTORY_CSR' && (
+        <div className="space-y-6">
+          
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                 <Layers className="w-4 h-4 text-emerald-400" />
-                <span>Curated Schedule VII Institutional Bundles</span>
+                <span>Aggregated Schedule VII Infrastructure Clusters</span>
               </h2>
-              <span className="text-xs text-slate-400">Audited Implementing Agency Ready</span>
+              <span className="text-xs text-slate-400">Multi-School Aggregations</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
@@ -122,11 +284,9 @@ export const CorporateView: React.FC = () => {
                   className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:border-slate-700 transition"
                 >
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-800 text-emerald-400">
-                        {b.scheduleVII}
-                      </span>
-                    </div>
+                    <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-800 text-emerald-400">
+                      {b.scheduleVII}
+                    </span>
 
                     <h3 className="text-xs sm:text-sm font-bold text-white leading-snug">{b.title}</h3>
                     <p className="text-[11px] text-slate-400 line-clamp-3">{b.description}</p>
@@ -164,7 +324,7 @@ export const CorporateView: React.FC = () => {
 
             {csrAllocations.length === 0 ? (
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center text-xs text-slate-400">
-                No statutory grants issued in this session yet. Fund a bundle above to simulate real-time Utilization Certificate generation.
+                No statutory grants issued in this session yet. Fund a bundle or adopt a direct school need above to generate a real-time Utilization Certificate.
               </div>
             ) : (
               <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-x-auto">
@@ -208,8 +368,10 @@ export const CorporateView: React.FC = () => {
           </div>
 
         </div>
-      ) : (
-        /* TAB 2: ITAD & CORPORATE E-WASTE RETIREMENT PORTAL */
+      )}
+
+      {/* TAB 3: ITAD & CORPORATE E-WASTE RETIREMENT PORTAL */}
+      {activeTab === 'ITAD_ESG' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xl">
@@ -219,7 +381,7 @@ export const CorporateView: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-white">Enterprise IT Asset Disposition (ITAD)</h3>
-                <p className="text-xs text-slate-400">Donate refreshed hardware directly to schools without e-waste leaks</p>
+                <p className="text-xs text-slate-400">Direct-to-school hardware deployment with NIST-grade data wiping</p>
               </div>
             </div>
 
