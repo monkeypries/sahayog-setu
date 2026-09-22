@@ -33,8 +33,8 @@ interface AppContextType {
 
   // Individual Donor Mutations
   pledges: InKindPledge[];
-  addInKindPledge: (pledge: Omit<InKindPledge, 'id' | 'status' | 'createdAt'>) => void;
-  addMicroSponsorship: (sponsorship: Omit<MicroSponsorship, 'id' | 'form10BERefNo' | 'createdAt'>) => string;
+  addInKindPledge: (pledge: Omit<InKindPledge, 'id' | 'createdAt'>) => void;
+  addMicroSponsorship: (sponsorship: Omit<MicroSponsorship, 'id' | 'certificate10BENo' | 'date'>) => string;
 
   // Corporate CSR State & Mutations
   csrAllocations: CSRAllocation[];
@@ -50,36 +50,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Persona switchboard
   const [currentRole, setCurrentRole] = useState<UserRole>('beneficiary');
 
-  // Language localization
-  const [language, setLanguage] = useState<Language>('en');
-
-  // Core entities
-  const [requests, setRequests] = useState<NeedRequest[]>(INITIAL_REQUESTS);
-  const [pledges, setPledges] = useState<InKindPledge[]>(INITIAL_PLEDGES);
-  const [csrAllocations, setCsrAllocations] = useState<CSRAllocation[]>(INITIAL_CSR_ALLOCATIONS);
-
-  // Hydrate from localStorage on initial client mount
-  useEffect(() => {
-    try {
+  // Lazy state initializations to eliminate React 19 cascading-render lint errors
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('sahayog_lang') as Language;
-      if (savedLang === 'en' || savedLang === 'hi') {
-        setLanguage(savedLang);
-      }
-
-      const savedRequests = localStorage.getItem('sahayog_requests');
-      if (savedRequests) setRequests(JSON.parse(savedRequests));
-
-      const savedPledges = localStorage.getItem('sahayog_pledges');
-      if (savedPledges) setPledges(JSON.parse(savedPledges));
-
-      const savedCSR = localStorage.getItem('sahayog_csr');
-      if (savedCSR) setCsrAllocations(JSON.parse(savedCSR));
-    } catch (e) {
-      console.warn('LocalStorage hydration error:', e);
+      if (savedLang === 'en' || savedLang === 'hi') return savedLang;
     }
-  }, []);
+    return 'en';
+  });
 
-  // Sync state to localStorage
+  const [requests, setRequests] = useState<NeedRequest[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('sahayog_requests');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse cached requests', e);
+      }
+    }
+    return INITIAL_REQUESTS;
+  });
+
+  const [pledges, setPledges] = useState<InKindPledge[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('sahayog_pledges');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse cached pledges', e);
+      }
+    }
+    return INITIAL_PLEDGES;
+  });
+
+  const [csrAllocations, setCsrAllocations] = useState<CSRAllocation[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('sahayog_csr');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse cached CSR allocations', e);
+      }
+    }
+    return INITIAL_CSR_ALLOCATIONS;
+  });
+
+  // Sync state mutations to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('sahayog_requests', JSON.stringify(requests));
@@ -148,12 +164,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Donor: Track A - In-Kind Physical Pledge
-  const addInKindPledge = (pledge: Omit<InKindPledge, 'id' | 'status' | 'createdAt'>) => {
+  const addInKindPledge = (pledge: Omit<InKindPledge, 'id' | 'createdAt'>) => {
     const id = `PLG-${Date.now().toString().slice(-4)}`;
     const created: InKindPledge = {
       ...pledge,
       id,
-      status: 'PLEDGED',
       createdAt: new Date().toISOString().split('T')[0]
     };
     setPledges(prev => [created, ...prev]);
@@ -175,7 +190,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Donor: Track B - Micro-Sponsorship with Form 10BE
-  const addMicroSponsorship = (sponsorship: Omit<MicroSponsorship, 'id' | 'form10BERefNo' | 'createdAt'>): string => {
+  const addMicroSponsorship = (sponsorship: Omit<MicroSponsorship, 'id' | 'certificate10BENo' | 'date'>): string => {
     const certNo = `10BE-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
 
     setRequests(prev =>
@@ -213,7 +228,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return ucNo;
   };
 
-  // Reset to seed data
+  // Reset to initial seed state
   const resetData = () => {
     localStorage.removeItem('sahayog_requests');
     localStorage.removeItem('sahayog_pledges');

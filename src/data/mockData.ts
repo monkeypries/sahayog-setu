@@ -1,71 +1,103 @@
-import { NeedRequest } from '@/types';
+import { NeedRequest, InKindPledge, CSRAllocation } from '@/types';
 
 export const INITIAL_REQUESTS: NeedRequest[] = [
   {
-    id: 'REQ-DEL-101',
+    id: 'REQ-1001',
+    title: 'Functional Laptops for ICT Lab',
+    category: 'TECH',
+    beneficiaryName: 'Govt. Boys Senior Secondary School',
+    beneficiaryType: 'Govt School',
+    location: 'Sarita Vihar, South East Delhi',
+    pincode: '110076',
+    udiseOrRegNo: '07090301201',
+    quantityNeeded: 5,
+    quantityFulfilled: 0,
+    unit: 'Laptops',
+    urgency: 'HIGH',
+    specifications: ['Minimum 8GB RAM', 'Intel Core i3 or equivalent', 'Working charger'],
+    estimatedCostPerUnit: 18000,
+    status: 'ACTIVE',
+    createdAt: '2026-03-15'
+  },
+  {
+    id: 'REQ-1002',
     title: 'Functional Laptops for Class 9 & 10 ICT Lab',
     category: 'TECH',
+    beneficiaryName: 'Govt. Boys Senior Secondary School',
+    beneficiaryType: 'Govt School',
+    location: 'Sarita Vihar, South East Delhi',
+    pincode: '110076',
+    udiseOrRegNo: '07090301201',
     quantityNeeded: 10,
     quantityFulfilled: 3,
     unit: 'Laptops',
-    beneficiaryName: 'Govt. Boys Senior Secondary School',
-    beneficiaryType: 'Govt School',
-    udiseOrRegNo: '07030204101',
-    location: 'Sarita Vihar, South East Delhi',
-    pincode: '110076',
     urgency: 'HIGH',
-    status: 'ACTIVE',
+    specifications: ['Intel Core i3 / Ryzen 3 or higher', 'Minimum 8GB RAM', 'Working webcam and charger'],
     estimatedCostPerUnit: 18000,
-    specifications: [
-      'Intel Core i3 / Ryzen 3 or higher',
-      'Minimum 8GB RAM with working charger',
-      'Functional battery (minimum 45 min backup)',
-      'Operating display with no major cracks'
-    ],
-    createdAt: '2026-09-18'
+    status: 'ACTIVE',
+    createdAt: '2026-03-10'
   },
   {
-    id: 'REQ-DEL-102',
+    id: 'REQ-1003',
     title: 'Two-Seater Wooden Study Benches & Desks',
     category: 'FURNITURE',
+    beneficiaryName: 'Prerna Children Home & Shelter',
+    beneficiaryType: 'Child Shelter',
+    location: 'Dwarka Sector 14, New Delhi',
+    pincode: '110078',
+    udiseOrRegNo: 'DL-DWA-CCI-042',
     quantityNeeded: 25,
     quantityFulfilled: 10,
     unit: 'Sets',
-    beneficiaryName: 'Prerna Children Home & Shelter',
-    beneficiaryType: 'Child Shelter',
-    udiseOrRegNo: 'DL/2018/0192842',
-    location: 'Dwarka Sector 16, New Delhi',
-    pincode: '110078',
-    urgency: 'MEDIUM',
-    status: 'ACTIVE',
+    urgency: 'HIGH',
+    specifications: ['Dual desk + dual bench integrated or separate', 'Solid wood or metal frame'],
     estimatedCostPerUnit: 2400,
-    specifications: [
-      'Dual desk + dual bench integrated or separate',
-      'Solid wood or metal frame',
-      'No protruding nails or hazardous splintering'
-    ],
-    createdAt: '2026-09-19'
+    status: 'ACTIVE',
+    createdAt: '2026-03-08'
   },
   {
-    id: 'REQ-DEL-103',
-    title: 'STEM Science & Geometry Kits for Middle School',
+    id: 'REQ-1004',
+    title: 'Middle School STEM Science Kits',
     category: 'STATIONERY',
-    quantityNeeded: 60,
-    quantityFulfilled: 60,
-    unit: 'Kits',
     beneficiaryName: 'Kasturba Balika Vidyalaya',
     beneficiaryType: 'Govt School',
-    udiseOrRegNo: '07040102203',
-    location: 'Ishwar Nagar, Mathura Road, New Delhi',
-    pincode: '110065',
-    urgency: 'NORMAL',
+    location: 'Okhla Phase II, New Delhi',
+    pincode: '110020',
+    udiseOrRegNo: '07090305504',
+    quantityNeeded: 15,
+    quantityFulfilled: 15,
+    unit: 'Kits',
+    urgency: 'MEDIUM',
+    specifications: ['Compass & divider set with drawing instruments', 'Primary science apparatus set'],
+    estimatedCostPerUnit: 1200,
     status: 'DELIVERED',
-    estimatedCostPerUnit: 450,
-    specifications: [
-      'Compass & divider set with drawing instruments',
-      'Primary science apparatus set',
-      'Notebook bundle (4 single-line + 2 plain)'
-    ],
-    createdAt: '2026-09-12'
+    createdAt: '2026-03-01'
+  }
+];
+
+export const INITIAL_PLEDGES: InKindPledge[] = [
+  {
+    id: 'PLG-5001',
+    requestId: 'REQ-1002',
+    donorName: 'Rahul Verma',
+    donorPhone: '+91 98112 34567',
+    itemCondition: 'Good-MinorCosmetic',
+    photos: [],
+    checklistConfirmed: true,
+    logisticsMethod: 'PORTER_PICKUP',
+    createdAt: '2026-03-18'
+  }
+];
+
+export const INITIAL_CSR_ALLOCATIONS: CSRAllocation[] = [
+  {
+    id: 'CSR-9001',
+    corporateName: 'TechCorp Solutions India Pvt Ltd',
+    cinNo: 'U72200DL2015PTC284910',
+    projectTitle: 'Smart Digital Classroom Infrastructure Drive',
+    scheduleVIIItem: 'Item (ii) - Education & Digital Literacy',
+    amountAllocated: 250000,
+    utilizationCertNo: 'UC-MCA-2026-84920',
+    date: '2026-03-12'
   }
 ];
