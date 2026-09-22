@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { RaiseNeedModal } from './RaiseNeedModal';
 import { NeedRequest } from '@/types';
+
 import { 
   Building, 
   PlusCircle, 
@@ -16,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const BeneficiaryView: React.FC = () => {
-  const { requests, updateRequestStatus } = useApp();
+  const { requests, updateRequestStatus, t } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeSignOffRequest, setActiveSignOffRequest] = useState<NeedRequest | null>(null);
   const [otpInput, setOtpInput] = useState('');

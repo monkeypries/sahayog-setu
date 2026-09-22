@@ -3,106 +3,165 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   NeedRequest, 
-  UserRole, 
   InKindPledge, 
   MicroSponsorship, 
   CSRAllocation, 
+  UserRole, 
   RequestStatus 
 } from '@/types';
-import { INITIAL_REQUESTS } from '@/data/mockData';
+import { 
+  INITIAL_REQUESTS, 
+  INITIAL_PLEDGES, 
+  INITIAL_CSR_ALLOCATIONS 
+} from '@/data/mockData';
+import { Language, TRANSLATIONS } from '@/data/translations';
 
 interface AppContextType {
-  // Active Persona
+  // Navigation & Role State
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
 
-  // Requests Data
+  // Language & Translation State
+  language: Language;
+  toggleLanguage: () => void;
+  t: typeof TRANSLATIONS['en'];
+
+  // Needs State & Mutations
   requests: NeedRequest[];
-  addRequest: (newReq: Omit<NeedRequest, 'id' | 'createdAt' | 'quantityFulfilled' | 'status'>) => void;
+  addRequest: (newReq: Omit<NeedRequest, 'id' | 'status' | 'quantityFulfilled' | 'createdAt'>) => void;
   updateRequestStatus: (id: string, status: RequestStatus) => void;
 
-  // Donor Actions
+  // Individual Donor Mutations
   pledges: InKindPledge[];
-  addInKindPledge: (pledge: Omit<InKindPledge, 'id' | 'createdAt'>) => void;
-  sponsorships: MicroSponsorship[];
-  addMicroSponsorship: (sponsorship: Omit<MicroSponsorship, 'id' | 'date' | 'certificate10BENo'>) => string;
+  addInKindPledge: (pledge: Omit<InKindPledge, 'id' | 'status' | 'createdAt'>) => void;
+  addMicroSponsorship: (sponsorship: Omit<MicroSponsorship, 'id' | 'form10BERefNo' | 'createdAt'>) => string;
 
-  // Corporate Actions
+  // Corporate CSR State & Mutations
   csrAllocations: CSRAllocation[];
-  addCSRAllocation: (allocation: Omit<CSRAllocation, 'id' | 'date' | 'utilizationCertNo'>) => string;
+  addCSRAllocation: (allocation: Omit<CSRAllocation, 'id' | 'utilizationCertNo' | 'date'>) => string;
 
-  // Reset demo
+  // Reset utilities
   resetData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState<UserRole>('donor');
-  const [requests, setRequests] = useState<NeedRequest[]>([]);
-  const [pledges, setPledges] = useState<InKindPledge[]>([]);
-  const [sponsorships, setSponsorships] = useState<MicroSponsorship[]>([]);
-  const [csrAllocations, setCsrAllocations] = useState<CSRAllocation[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  // Persona switchboard
+  const [currentRole, setCurrentRole] = useState<UserRole>('beneficiary');
 
-  // Initialize from LocalStorage or Fallback to Seed Data
+  // Language localization
+  const [language, setLanguage] = useState<Language>('en');
+
+  // Core entities
+  const [requests, setRequests] = useState<NeedRequest[]>(INITIAL_REQUESTS);
+  const [pledges, setPledges] = useState<InKindPledge[]>(INITIAL_PLEDGES);
+  const [csrAllocations, setCsrAllocations] = useState<CSRAllocation[]>(INITIAL_CSR_ALLOCATIONS);
+
+  // Hydrate from localStorage on initial client mount
   useEffect(() => {
     try {
-      const storedReqs = localStorage.getItem('sahayog_requests');
-      const storedPledges = localStorage.getItem('sahayog_pledges');
-      const storedSponsors = localStorage.getItem('sahayog_sponsorships');
-      const storedCSR = localStorage.getItem('sahayog_csr');
+      const savedLang = localStorage.getItem('sahayog_lang') as Language;
+      if (savedLang === 'en' || savedLang === 'hi') {
+        setLanguage(savedLang);
+      }
 
-      setRequests(storedReqs ? JSON.parse(storedReqs) : INITIAL_REQUESTS);
-      setPledges(storedPledges ? JSON.parse(storedPledges) : []);
-      setSponsorships(storedSponsors ? JSON.parse(storedSponsors) : []);
-      setCsrAllocations(storedCSR ? JSON.parse(storedCSR) : []);
+      const savedRequests = localStorage.getItem('sahayog_requests');
+      if (savedRequests) setRequests(JSON.parse(savedRequests));
+
+      const savedPledges = localStorage.getItem('sahayog_pledges');
+      if (savedPledges) setPledges(JSON.parse(savedPledges));
+
+      const savedCSR = localStorage.getItem('sahayog_csr');
+      if (savedCSR) setCsrAllocations(JSON.parse(savedCSR));
     } catch (e) {
-      console.warn('LocalStorage error, falling back to mock data', e);
-      setRequests(INITIAL_REQUESTS);
+      console.warn('LocalStorage hydration error:', e);
     }
-    setIsInitialized(true);
   }, []);
 
-  // Save to LocalStorage whenever state changes
+  // Sync state to localStorage
   useEffect(() => {
-    if (!isInitialized) return;
-    localStorage.setItem('sahayog_requests', JSON.stringify(requests));
-    localStorage.setItem('sahayog_pledges', JSON.stringify(pledges));
-    localStorage.setItem('sahayog_sponsorships', JSON.stringify(sponsorships));
-    localStorage.setItem('sahayog_csr', JSON.stringify(csrAllocations));
-  }, [requests, pledges, sponsorships, csrAllocations, isInitialized]);
+    try {
+      localStorage.setItem('sahayog_requests', JSON.stringify(requests));
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
+  }, [requests]);
 
-  // Actions
-  const addRequest = (newReq: Omit<NeedRequest, 'id' | 'createdAt' | 'quantityFulfilled' | 'status'>) => {
-    const item: NeedRequest = {
+  useEffect(() => {
+    try {
+      localStorage.setItem('sahayog_pledges', JSON.stringify(pledges));
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
+  }, [pledges]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sahayog_csr', JSON.stringify(csrAllocations));
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
+  }, [csrAllocations]);
+
+  // Toggle Language Handler
+  const toggleLanguage = () => {
+    const nextLang: Language = language === 'en' ? 'hi' : 'en';
+    setLanguage(nextLang);
+    try {
+      localStorage.setItem('sahayog_lang', nextLang);
+    } catch (e) {
+      console.warn('Failed to save language preference:', e);
+    }
+  };
+
+  const t = TRANSLATIONS[language];
+
+  // Beneficiary: Raise a new need
+  const addRequest = (newReq: Omit<NeedRequest, 'id' | 'status' | 'quantityFulfilled' | 'createdAt'>) => {
+    const id = `REQ-${Date.now().toString().slice(-4)}`;
+    const created: NeedRequest = {
       ...newReq,
-      id: `REQ-DEL-${Math.floor(100 + Math.random() * 900)}`,
+      id,
       quantityFulfilled: 0,
       status: 'ACTIVE',
       createdAt: new Date().toISOString().split('T')[0]
     };
-    setRequests(prev => [item, ...prev]);
+    setRequests(prev => [created, ...prev]);
   };
 
+  // Ops Desk / Delivery: Update Lifecycle State
   const updateRequestStatus = (id: string, status: RequestStatus) => {
     setRequests(prev =>
-      prev.map(r => (r.id === id ? { ...r, status } : r))
+      prev.map(r => {
+        if (r.id === id) {
+          const isFulfilled = status === 'DELIVERED';
+          return {
+            ...r,
+            status,
+            quantityFulfilled: isFulfilled ? r.quantityNeeded : r.quantityFulfilled
+          };
+        }
+        return r;
+      })
     );
   };
 
-  const addInKindPledge = (pledgeData: Omit<InKindPledge, 'id' | 'createdAt'>) => {
-    const pledge: InKindPledge = {
-      ...pledgeData,
-      id: `PLG-${Math.floor(1000 + Math.random() * 9000)}`,
+  // Donor: Track A - In-Kind Physical Pledge
+  const addInKindPledge = (pledge: Omit<InKindPledge, 'id' | 'status' | 'createdAt'>) => {
+    const id = `PLG-${Date.now().toString().slice(-4)}`;
+    const created: InKindPledge = {
+      ...pledge,
+      id,
+      status: 'PLEDGED',
       createdAt: new Date().toISOString().split('T')[0]
     };
-    setPledges(prev => [pledge, ...prev]);
+    setPledges(prev => [created, ...prev]);
 
-    // Increment fulfilled count and adjust status
+    // Advance request status
     setRequests(prev =>
       prev.map(r => {
-        if (r.id === pledgeData.requestId) {
+        if (r.id === pledge.requestId) {
           const nextFulfilled = Math.min(r.quantityNeeded, r.quantityFulfilled + 1);
           return {
             ...r,
@@ -115,25 +174,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const addMicroSponsorship = (sponsorshipData: Omit<MicroSponsorship, 'id' | 'date' | 'certificate10BENo'>): string => {
+  // Donor: Track B - Micro-Sponsorship with Form 10BE
+  const addMicroSponsorship = (sponsorship: Omit<MicroSponsorship, 'id' | 'form10BERefNo' | 'createdAt'>): string => {
     const certNo = `10BE-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-    const record: MicroSponsorship = {
-      ...sponsorshipData,
-      id: `SPN-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      certificate10BENo: certNo
-    };
-    setSponsorships(prev => [record, ...prev]);
 
-    // Mark quantity fulfilled
     setRequests(prev =>
       prev.map(r => {
-        if (r.id === sponsorshipData.requestId) {
-          const nextCount = Math.min(r.quantityNeeded, r.quantityFulfilled + 1);
+        if (r.id === sponsorship.requestId) {
+          const unitsPurchased = Math.max(1, Math.floor(sponsorship.amount / (r.estimatedCostPerUnit || 1000)));
+          const nextFulfilled = Math.min(r.quantityNeeded, r.quantityFulfilled + unitsPurchased);
           return {
             ...r,
-            quantityFulfilled: nextCount,
-            status: nextCount >= r.quantityNeeded ? 'DELIVERED' : r.status
+            quantityFulfilled: nextFulfilled,
+            status: nextFulfilled >= r.quantityNeeded ? 'PLEDGED' : r.status
           };
         }
         return r;
@@ -143,24 +196,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return certNo;
   };
 
-  const addCSRAllocation = (allocationData: Omit<CSRAllocation, 'id' | 'date' | 'utilizationCertNo'>): string => {
-    const certNo = `UC-CSR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const record: CSRAllocation = {
-      ...allocationData,
-      id: `CSR-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      utilizationCertNo: certNo
+  // Corporate: Statutory Section 135 Grant with Board UC
+  const addCSRAllocation = (allocation: Omit<CSRAllocation, 'id' | 'utilizationCertNo' | 'date'>): string => {
+    const id = `CSR-${Date.now().toString().slice(-4)}`;
+    const ucNo = `UC-MCA-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+    const date = new Date().toISOString().split('T')[0];
+
+    const created: CSRAllocation = {
+      ...allocation,
+      id,
+      utilizationCertNo: ucNo,
+      date
     };
-    setCsrAllocations(prev => [record, ...prev]);
-    return certNo;
+
+    setCsrAllocations(prev => [created, ...prev]);
+    return ucNo;
   };
 
+  // Reset to seed data
   const resetData = () => {
+    localStorage.removeItem('sahayog_requests');
+    localStorage.removeItem('sahayog_pledges');
+    localStorage.removeItem('sahayog_csr');
     setRequests(INITIAL_REQUESTS);
-    setPledges([]);
-    setSponsorships([]);
-    setCsrAllocations([]);
-    localStorage.clear();
+    setPledges(INITIAL_PLEDGES);
+    setCsrAllocations(INITIAL_CSR_ALLOCATIONS);
   };
 
   return (
@@ -168,12 +228,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         currentRole,
         setCurrentRole,
+        language,
+        toggleLanguage,
+        t,
         requests,
         addRequest,
         updateRequestStatus,
         pledges,
         addInKindPledge,
-        sponsorships,
         addMicroSponsorship,
         csrAllocations,
         addCSRAllocation,

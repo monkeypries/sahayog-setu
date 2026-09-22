@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const DonorFeed: React.FC = () => {
-  const { requests } = useApp();
+  const { requests, t } = useApp();
 
   const [searchPincode, setSearchPincode] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');

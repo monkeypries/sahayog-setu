@@ -3,16 +3,36 @@
 import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/types';
-import { Building2, HeartHandshake, School, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Building2, HeartHandshake, School, ShieldCheck, RefreshCw, Languages } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { currentRole, setCurrentRole, resetData } = useApp();
+  const { currentRole, setCurrentRole, resetData, language, toggleLanguage, t } = useApp();
 
   const roles: { id: UserRole; label: string; shortLabel: string; icon: React.ReactNode }[] = [
-    { id: 'donor', label: 'Individual Donor', shortLabel: 'Donor', icon: <HeartHandshake className="w-4 h-4 shrink-0" /> },
-    { id: 'beneficiary', label: 'Beneficiary', shortLabel: 'Beneficiary', icon: <School className="w-4 h-4 shrink-0" /> },
-    { id: 'corporate', label: 'Corporate CSR', shortLabel: 'Corporate', icon: <Building2 className="w-4 h-4 shrink-0" /> },
-    { id: 'admin', label: 'Ops Desk', shortLabel: 'Ops', icon: <ShieldCheck className="w-4 h-4 shrink-0" /> }
+    { 
+      id: 'donor', 
+      label: t.donorRole, 
+      shortLabel: language === 'hi' ? 'दाता' : 'Donor', 
+      icon: <HeartHandshake className="w-4 h-4 shrink-0" /> 
+    },
+    { 
+      id: 'beneficiary', 
+      label: t.beneficiaryRole, 
+      shortLabel: language === 'hi' ? 'स्कूल' : 'School', 
+      icon: <School className="w-4 h-4 shrink-0" /> 
+    },
+    { 
+      id: 'corporate', 
+      label: t.corporateRole, 
+      shortLabel: language === 'hi' ? 'CSR' : 'CSR', 
+      icon: <Building2 className="w-4 h-4 shrink-0" /> 
+    },
+    { 
+      id: 'admin', 
+      label: t.opsRole, 
+      shortLabel: language === 'hi' ? 'ऑप्स' : 'Ops', 
+      icon: <ShieldCheck className="w-4 h-4 shrink-0" /> 
+    }
   ];
 
   return (
@@ -20,7 +40,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           
-          {/* Brand header */}
+          {/* Brand & Mobile Actions */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 sm:w-9 sm:h-9 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-slate-950 text-base sm:text-xl shadow-md shadow-emerald-500/20 shrink-0">
@@ -28,31 +48,43 @@ export const Navbar: React.FC = () => {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-base sm:text-lg font-bold tracking-tight">SahayogSetu</h1>
+                  <h1 className="text-base sm:text-lg font-bold tracking-tight">{t.appName}</h1>
                   <span className="text-[9px] sm:text-[10px] uppercase font-semibold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">
                     MVP 1.0
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-xs text-slate-400 hidden xs:block">
-                  Hyperlocal In-Kind & CSR Infrastructure Engine
+                  {t.tagline}
                 </p>
               </div>
             </div>
 
-            {/* Reset button for mobile */}
-            <button
-              onClick={() => {
-                if (confirm('Reset database back to initial seed state?')) resetData();
-              }}
-              title="Reset Demo Data"
-              className="md:hidden flex items-center gap-1 text-[11px] text-slate-400 hover:text-rose-400 p-1.5 rounded-lg border border-slate-800"
-            >
-              <RefreshCw className="w-3 h-3" />
-              <span>Reset</span>
-            </button>
+            {/* Mobile Actions: Language switch & Reset */}
+            <div className="flex md:hidden items-center gap-1.5">
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-1 text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 px-2 py-1.5 rounded-lg border border-slate-700 transition"
+                title="Switch Language"
+              >
+                <Languages className="w-3.5 h-3.5" />
+                <span>{t.languageName}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (confirm(language === 'hi' ? 'क्या आप डेमो डेटा रीसेट करना चाहते हैं?' : 'Reset database back to initial seed state?')) {
+                    resetData();
+                  }
+                }}
+                title={t.resetDemo}
+                className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-rose-400 p-1.5 rounded-lg border border-slate-800"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          {/* Persona Switcher Tabs: Scrollable on mobile */}
+          {/* Persona Switcher Tabs (Scrollable on small devices) */}
           <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar scroll-smooth">
             {roles.map(r => {
               const isActive = currentRole === r.id;
@@ -74,17 +106,30 @@ export const Navbar: React.FC = () => {
             })}
           </div>
 
-          {/* Reset button for desktop */}
-          <button
-            onClick={() => {
-              if (confirm('Reset database back to initial seed state?')) resetData();
-            }}
-            title="Reset Mock Data"
-            className="hidden md:flex items-center gap-1.5 text-xs text-slate-400 hover:text-rose-400 transition-colors p-2"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Reset Demo</span>
-          </button>
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-1.5 rounded-lg border border-slate-700 transition"
+              title="Switch Language"
+            >
+              <Languages className="w-3.5 h-3.5" />
+              <span>{t.languageName}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (confirm(language === 'hi' ? 'क्या आप डेमो डेटा रीसेट करना चाहते हैं?' : 'Reset database back to initial seed state?')) {
+                  resetData();
+                }
+              }}
+              title={t.resetDemo}
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-rose-400 transition-colors p-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>{t.resetDemo}</span>
+            </button>
+          </div>
 
         </div>
       </div>

@@ -48,7 +48,7 @@ const CSR_BUNDLES = [
 ];
 
 export const CorporateView: React.FC = () => {
-  const { requests, csrAllocations } = useApp();
+  const { requests, csrAllocations, t } = useApp();
 
   const [activeTab, setActiveTab] = useState<'NEED_INTELLIGENCE' | 'STATUTORY_CSR' | 'ITAD_ESG'>('NEED_INTELLIGENCE');
   const [selectedBundle, setSelectedBundle] = useState<typeof CSR_BUNDLES[0] | null>(null);
