@@ -11,25 +11,25 @@ export const Navbar: React.FC = () => {
   const roles: { id: UserRole; label: string; shortLabel: string; icon: React.ReactNode }[] = [
     { 
       id: 'donor', 
-      label: t.donorRole, 
+      label: t?.donorRole || 'Individual Donor', 
       shortLabel: language === 'hi' ? 'दाता' : 'Donor', 
       icon: <HeartHandshake className="w-4 h-4 shrink-0" /> 
     },
     { 
       id: 'beneficiary', 
-      label: t.beneficiaryRole, 
+      label: t?.beneficiaryRole || 'Beneficiary', 
       shortLabel: language === 'hi' ? 'स्कूल' : 'School', 
       icon: <School className="w-4 h-4 shrink-0" /> 
     },
     { 
       id: 'corporate', 
-      label: t.corporateRole, 
+      label: t?.corporateRole || 'Corporate CSR', 
       shortLabel: language === 'hi' ? 'CSR' : 'CSR', 
       icon: <Building2 className="w-4 h-4 shrink-0" /> 
     },
     { 
       id: 'admin', 
-      label: t.opsRole, 
+      label: t?.opsRole || 'Ops Desk', 
       shortLabel: language === 'hi' ? 'ऑप्स' : 'Ops', 
       icon: <ShieldCheck className="w-4 h-4 shrink-0" /> 
     }
@@ -37,74 +37,73 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 backdrop-blur-md bg-slate-900/95">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
           
-          {/* Top Bar: Brand + Quick Actions */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-slate-950 text-base sm:text-xl shadow-md shadow-emerald-500/20 shrink-0">
-                सं
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-base sm:text-lg font-bold tracking-tight">{t.appName}</h1>
-                  <span className="text-[9px] sm:text-[10px] uppercase font-semibold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                    MVP 1.0
-                  </span>
-                </div>
-                <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">
-                  {t.tagline}
-                </p>
-              </div>
+          {/* 1. Left: Brand Logo & Title */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-slate-950 text-xl shadow-md shadow-emerald-500/20">
+              सं
             </div>
-
-            {/* Persistent Global Actions (Visible on Mobile & Desktop) */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleLanguage}
-                type="button"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition shadow-sm"
-                title="Switch Language / भाषा बदलें"
-              >
-                <Languages className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{t.languageName}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (confirm(language === 'hi' ? 'क्या आप डेमो डेटा रीसेट करना चाहते हैं?' : 'Reset database back to initial seed state?')) {
-                    resetData();
-                  }
-                }}
-                title={t.resetDemo}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-slate-800 transition"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-              </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold tracking-tight text-white">
+                  {t?.appName || 'SahayogSetu'}
+                </span>
+                <span className="text-[10px] uppercase font-semibold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                  MVP 1.0
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Persona Switcher Tabs: Scrollable touch container */}
-          <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar scroll-smooth">
+          {/* 2. Center: Persona Tabs */}
+          <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar">
             {roles.map(r => {
               const isActive = currentRole === r.id;
               return (
                 <button
                   key={r.id}
                   onClick={() => setCurrentRole(r.id)}
-                  className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex-1 sm:flex-initial ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                     isActive
-                      ? 'bg-emerald-500 text-slate-950 shadow-md font-semibold'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md font-bold'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                   }`}
                 >
                   {r.icon}
-                  <span className="sm:inline hidden">{r.label}</span>
-                  <span className="sm:hidden inline">{r.shortLabel}</span>
+                  <span className="hidden sm:inline">{r.label}</span>
+                  <span className="sm:hidden">{r.shortLabel}</span>
                 </button>
               );
             })}
+          </div>
+
+          {/* 3. Right: Language Switcher & Reset Button */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Always-visible Language Switch Pill */}
+            <button
+              onClick={toggleLanguage}
+              type="button"
+              className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer"
+            >
+              <Languages className="w-3.5 h-3.5" />
+              <span>{language === 'en' ? 'हिंदी' : 'English'}</span>
+            </button>
+
+            {/* Reset Button */}
+            <button
+              onClick={() => {
+                if (confirm(language === 'hi' ? 'क्या आप डेमो डेटा रीसेट करना चाहते हैं?' : 'Reset demo database back to initial state?')) {
+                  resetData();
+                }
+              }}
+              title={t?.resetDemo || 'Reset Demo'}
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 border border-slate-800 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span className="hidden md:inline">{t?.resetDemo || 'Reset Demo'}</span>
+            </button>
           </div>
 
         </div>
